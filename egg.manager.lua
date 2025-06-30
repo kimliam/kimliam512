@@ -1,0 +1,70 @@
+# Save the provided Lua script to a .lua file so the user can download it.
+lua_script = """
+-- Egg Spawner and Detector for Grow a Garden (Delta Executor Safe)
+
+local EggManager = {}
+EggManager.SpawnedEggs = {}
+
+EggManager.EggTypes = {
+    Night = {"Hedgehog", "Mole", "Frog", "Echo Frog", "Night Owl", "Raccoon"},
+    Mythical = {"Red Giant Ant", "Squirrel", "Red Fox"},
+    Paradise = {"Ostrich", "Peacock", "Capybara", "Scarlet Macaw", "Mimic Octopus"},
+    Bug = {"Caterpillar", "Giant Mantis", "Giant Ant", "Dragon Fly"},
+    Oasis = {"Meerkat", "Sand Snake", "Axolotl", "Hyacinth Macaw", "Fennec Fox"}
+}
+
+function EggManager:SpawnEgg(eggType)
+    if not self.EggTypes[eggType] then return end
+    local egg = Instance.new("Part")
+    egg.Name = eggType .. " Egg"
+    egg.Shape = Enum.PartType.Ball
+    egg.Size = Vector3.new(2, 2, 2)
+    egg.Position = Vector3.new(math.random(-30,30), 5, math.random(-30,30))
+    egg.BrickColor = BrickColor.Random()
+    egg.Anchored = true
+    egg.Parent = workspace
+    table.insert(self.SpawnedEggs, egg)
+end
+
+function EggManager:DetectEggs()
+    for _, egg in ipairs(workspace:GetChildren()) do
+        if egg:IsA("Part") and egg.Name:find("Egg") then
+            print("[DETECTED]", egg.Name, egg.Position)
+        end
+    end
+end
+
+local function createUI()
+    local gui = Instance.new("ScreenGui", game.Players.LocalPlayer:WaitForChild("PlayerGui"))
+    gui.Name = "EggUI"
+
+    local types = {"Night", "Mythical", "Paradise", "Bug", "Oasis"}
+    for i, eggType in ipairs(types) do
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(0,120,0,30)
+        b.Position = UDim2.new(0,10,0, i * 35)
+        b.Text = "Spawn " .. eggType
+        b.Parent = gui
+        b.MouseButton1Click:Connect(function()
+            EggManager:SpawnEgg(eggType)
+        end)
+    end
+
+    local detect = Instance.new("TextButton")
+    detect.Size = UDim2.new(0, 120, 0, 30)
+    detect.Position = UDim2.new(0,10,0, (#types + 1) * 35)
+    detect.Text = "Detect Eggs"
+    detect.Parent = gui
+    detect.MouseButton1Click:Connect(function()
+        EggManager:DetectEggs()
+    end)
+end
+
+createUI()
+"""
+
+file_path = "/mnt/data/egg_manager.lua"
+with open(file_path, "w") as file:
+    file.write(lua_script)
+
+file_path
